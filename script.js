@@ -1,10 +1,8 @@
 const personName = "YOUR FAVORITE PERSON";
 const fromName = "YOUR NAME";
 
-// List all images here directly
-const imageFiles = [
-  "pic1.jpg","pic2.jpg","pic3.jpg","pic4.jpg","pic5.jpg","pic6.jpg","pic7.jpg"
-];
+// List all images in root
+const imageFiles = ["pic1.jpg","pic2.jpg","pic3.jpg","pic4.jpg","pic5.jpg","pic6.jpg","pic7.jpg"];
 
 const slidesContainer = document.querySelector(".slides");
 const quoteBox = document.getElementById("quote");
@@ -18,16 +16,13 @@ let index = 0;
 let isTransitioning = false;
 let experienceStarted = false;
 
-/* Typewriter */
+/* Typewriter title */
 function typeWriter(text, el, i=0){
-  if(i<text.length){
-    el.innerHTML += text.charAt(i);
-    setTimeout(()=>typeWriter(text,el,i+1),70);
-  }
+  if(i<text.length){el.innerHTML+=text.charAt(i); setTimeout(()=>typeWriter(text,el,i+1),70);}
 }
 typeWriter(`Happy Birthday ${personName} 🤍`, title);
 
-/* Create slides dynamically */
+/* Create slides */
 imageFiles.forEach(file=>{
   const slide=document.createElement("section");
   slide.className="slide";
@@ -50,17 +45,19 @@ while(quotes.length<slides.length) quotes.push("Wishing you joy and happiness �
 
 /* Themes */
 themes=["#fbcfe8","#bfdbfe","#bbf7d0","#fde68a","#ddd6fe","#fecaca","#e9d5ff"];
-while(themes.length<slides.length){
-  const hue=Math.floor(Math.random()*360);
-  themes.push(`hsl(${hue},70%,85%)`);
-}
+while(themes.length<slides.length){const hue=Math.floor(Math.random()*360); themes.push(`hsl(${hue},70%,85%)`);}
 
 /* Start experience */
 document.body.addEventListener("pointerdown", startOnce,{once:true});
 function startOnce(){
   document.querySelector(".start").style.display="none";
-  music.play().catch(()=>{}); 
   index=0; experienceStarted=true; showSlide();
+
+  // Play music safely for mobile
+  const playPromise = music.play();
+  if(playPromise!==undefined){
+    playPromise.then(()=>console.log("Music playing!")).catch(()=>showPlayButton());
+  }
 }
 
 /* Show slide */
@@ -84,7 +81,7 @@ function prevSlide(){if(!experienceStarted||isTransitioning||index<=0)return; is
 
 /* Swipe + Tap */
 let startX=0, moved=false;
-document.addEventListener("pointerdown", e=>{ startX=e.clientX; moved=false; });
+document.addEventListener("pointerdown", e=>{startX=e.clientX; moved=false;});
 document.addEventListener("pointermove", ()=>moved=true);
 document.addEventListener("pointerup", e=>{
   const endX=e.clientX; const diff=startX-endX;
@@ -92,11 +89,20 @@ document.addEventListener("pointerup", e=>{
   else if(!moved){const mid=window.innerWidth/2; e.clientX<mid?prevSlide():nextSlide();}
 });
 
+/* Fallback button for music */
+function showPlayButton(){
+  const btn=document.createElement("button");
+  btn.id="playMusicBtn"; btn.innerText="Play Music";
+  document.body.appendChild(btn);
+  btn.addEventListener("click", ()=>{
+    music.play(); btn.remove();
+  });
+}
+
 /* Hearts */
 setInterval(()=>{
   const heart=document.createElement("span"); heart.innerText="🤍";
-  heart.style.left=Math.random()*100+"vw";
-  heart.style.animationDuration=(6+Math.random()*4)+"s";
+  heart.style.left=Math.random()*100+"vw"; heart.style.animationDuration=(6+Math.random()*4)+"s";
   document.querySelector(".hearts").appendChild(heart);
   setTimeout(()=>heart.remove(),10000);
 },450);
